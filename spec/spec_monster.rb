@@ -146,5 +146,23 @@ describe FeedMonster do
       }
       r.should == "Bar"
     end
+
+    it "should reduce" do
+      r = parse("<body><p>Foo</p><p>Bar</p><p>Baz</p></body>") {
+        element("body") {
+          reduce(lambda {
+                   element("p") {
+                     text
+                   }
+                 }) { |a,b|
+            if a.nil?
+              a
+            else
+              "#{a}\n#{b}"
+            end
+          }
+        }
+      }
+    end
   end
 end

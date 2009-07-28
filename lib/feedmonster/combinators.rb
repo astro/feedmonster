@@ -255,6 +255,25 @@ module FeedMonster
       end
     end
 
+    class Reduce < SAXConsumer
+      attr_reader :result
+
+      def initialize(continuation, &reducer)
+        super(continuation.call)
+        @result = nil
+        @continuation = continuation
+        @reducer = reducer
+      end
+
+      def event(m, *a)
+        super
+        if @child.done?
+          @result = @reducer.call(@result, @child.result)
+          @child = @continuation.call
+        end
+      end
+    end
+
     # Consume anything and be done
     def anything(&continuation)
       Anything.new(&continuation)
@@ -294,6 +313,10 @@ module FeedMonster
 
     def lift(child, &lifter)
       Lift.new(child, &lifter)
+    end
+
+    def reduce(continuation, &reducer)
+      Reduce.new(continuation, &reducer)
     end
   end
 end
