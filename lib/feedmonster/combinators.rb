@@ -217,6 +217,21 @@ module FeedMonster
       end
     end
 
+    class Lift < SAXConsumer
+      def initialize(child, &lifter)
+        super(child)
+        @lifter = lifter
+      end
+
+      def done?
+        @child.done?
+      end
+
+      def result
+        @lifter.call(@child.result)
+      end
+    end
+
     # Expects element and ends with it
     def element(name, &continuation)
       Element.new(name, &continuation)
@@ -249,5 +264,8 @@ module FeedMonster
       Constraint.new(getter, checker, &continuation)
     end
 
+    def lift(child, &lifter)
+      Lift.new(child, &lifter)
+    end
   end
 end

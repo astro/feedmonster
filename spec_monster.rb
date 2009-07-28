@@ -122,5 +122,14 @@ describe FeedMonster do
       parse1("<body><img src='foo.jpg'/></body>").should == 'foo.jpg'
       parse1("<body><p>Foobar</p></body>").should == 'Foobar'
     end
+
+    it "should lift result values" do
+      r = parse("<p>Foobar</p>") {
+        element("p") {
+          lift(text) { |s| {:text => s} }
+        }
+      }
+      r.should == {:text => "Foobar"}
+    end
   end
 end
