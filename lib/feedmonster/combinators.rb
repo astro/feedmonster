@@ -186,6 +186,37 @@ module FeedMonster
       end
     end
 
+    class OneOf < SAXConsumer
+      def initialize(children)
+        @children = children
+      end
+
+      def event(m, *a)
+        @children.delete_if do |child|
+          begin
+            child.event m, *a
+            false
+          rescue ParseError
+            true
+          end
+        end
+
+        if @children.empty?
+          raise ParseError.new('No alternatives left')
+        end
+      end
+
+      def done?
+        @children.any? do |child|
+          child.done?
+        end
+      end
+
+      def result
+        @children[0].result
+      end
+    end
+
     # Expects element and ends with it
     def element(name, &continuation)
       Element.new(name, &continuation)
@@ -208,6 +239,10 @@ module FeedMonster
     # Array
     def many(&continuation)
       Many.new(&continuation)
+    end
+
+    def one_of(children)
+      OneOf.new(children)
     end
 
     def constraint(getter, checker, &continuation)

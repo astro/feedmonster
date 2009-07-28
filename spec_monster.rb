@@ -5,7 +5,7 @@ require 'feedmonster/combinators'
 describe FeedMonster do
   include FeedMonster::Combinators
 
-  context "on a simple document" do
+  context "on simple documents" do
     def parse(s, &definition)
       parser = FeedMonster::Parser.new(&definition)
       parser << s
@@ -32,6 +32,17 @@ describe FeedMonster do
       r = parse("<p>Foobar</p>") {
         element("p") {
           text
+        }
+      }
+      r.should == "Foobar"
+    end
+
+    it "should not parse beyond element bounds" do
+      r = parse("<body><p>Foobar</p>baz</body>") {
+        element("body") {
+          element("p") {
+            text
+          }
         }
       }
       r.should == "Foobar"
@@ -95,6 +106,21 @@ describe FeedMonster do
           }
         }
       end.should raise_error(FeedMonster::ParseError)
+    end
+
+    it "should choose the right content" do
+      def parse1(s)
+        parse(s) {
+          element("body") {
+            one_of [
+                    element("p") { text },
+                    element("img") { attribute "src" }
+                   ]
+          }
+        }
+      end
+      parse1("<body><img src='foo.jpg'/></body>").should == 'foo.jpg'
+      parse1("<body><p>Foobar</p></body>").should == 'Foobar'
     end
   end
 end
