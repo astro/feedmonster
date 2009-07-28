@@ -1,4 +1,4 @@
-$: << 'lib'
+$: << File.dirname(__FILE__) + '/../lib'
 require 'feedmonster/parser'
 require 'feedmonster/combinators'
 
