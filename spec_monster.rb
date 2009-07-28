@@ -131,5 +131,20 @@ describe FeedMonster do
       }
       r.should == {:text => "Foobar"}
     end
+
+    it "should ignore anything" do
+      r = parse("<body><img src='foo.jpg'/><p>Bar</p>") {
+        element("body") {
+          anything {      # <img>
+            anything {    # src='foo.jpg'
+              anything {  # </img>
+                element("p") { text }
+              }
+            }
+          }
+        }
+      }
+      r.should == "Bar"
+    end
   end
 end

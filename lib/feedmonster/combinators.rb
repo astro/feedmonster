@@ -4,6 +4,29 @@ require 'feedmonster/parse_error'
 module FeedMonster
   module Combinators
 
+    class Anything < SAXConsumer
+      def initialize(&continuation)
+        @consumed = false
+        @child = continuation ? continuation.call : nil
+      end
+
+      def event(m, *a)
+        if @consumed
+          super
+        else
+          @consumed = true
+        end
+      end
+
+      def result
+        @child ? @child.result : nil
+      end
+
+      def done?
+        @consumed && @child.done?
+      end
+    end
+
     class Element < SAXConsumer
       def initialize(name, &continuation)
         @wanted_name = name
@@ -230,6 +253,11 @@ module FeedMonster
       def result
         @lifter.call(@child.result)
       end
+    end
+
+    # Consume anything and be done
+    def anything(&continuation)
+      Anything.new(&continuation)
     end
 
     # Expects element and ends with it
