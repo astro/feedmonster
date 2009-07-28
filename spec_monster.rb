@@ -1,11 +1,13 @@
-require 'parser'
+$: << 'lib'
+require 'feedmonster/parser'
+require 'feedmonster/combinators'
 
-describe StackMonster do
-  include StackMonster::Combinators
+describe FeedMonster do
+  include FeedMonster::Combinators
 
   context "on a simple document" do
     def parse(s, &definition)
-      parser = StackMonster::Parser.new(&definition)
+      parser = FeedMonster::Parser.new(&definition)
       parser << s
       parser.finish
       parser.result
@@ -23,7 +25,7 @@ describe StackMonster do
         parse("<x/>") {
           element "p"
         }
-      end.should raise_error(StackMonster::ParseError)
+      end.should raise_error(FeedMonster::ParseError)
     end
 
     it "should parse text content" do
@@ -92,7 +94,7 @@ describe StackMonster do
                        "head")
           }
         }
-      end.should raise_error(StackMonster::ParseError)
+      end.should raise_error(FeedMonster::ParseError)
     end
   end
 end
